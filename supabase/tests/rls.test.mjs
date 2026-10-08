@@ -29,14 +29,27 @@ const expectError = async (label, fn, pattern) => {
 };
 
 for (const f of sqlFiles) await run(fs.readFileSync(f, 'utf8'));
-// o Supabase já concede isso por padrão; o RLS é quem filtra
+// O Supabase concede isso por padrão. As tabelas do public ficam de fora de propósito:
+// desde 30/05/2026 o grant delas vem da migration de grants, e é ela que este teste valida.
 await run(`grant usage on schema public, auth, storage to anon, authenticated;
-  grant select, insert, update, delete on all tables in schema public to anon, authenticated;
   grant select, insert, update, delete on storage.objects to anon, authenticated;`);
 console.log(`carregados: ${sqlFiles.map((f) => path.basename(f)).join(', ')}`);
 
 check('buckets assets e rules existem e são privados',
   Number((await q(`select count(*) as n from storage.buckets where id in ('assets','rules') and public = false`))[0].n) === 2);
+
+// ---------- grants: o que cada papel alcança antes do RLS ----------
+// Pelo oid, não pelo nome: o Postgres não garante a ordem do WHERE, e montar 'public.' || nome
+// pra uma tabela de outro schema quebra a consulta.
+const tablesWhere = async (cond) => (await q(`select c.relname as t from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relkind = 'r' and ${cond} order by 1`)).map((r) => r.t).join(',');
+const can = (role, priv) => `has_table_privilege('${role}', c.oid, '${priv}')`;
+check('grants: anônimo só lê, e só as 5 tabelas do Grimório',
+  (await tablesWhere(can('anon', 'select'))) === 'blocks,campaigns,entities,links,sessions'
+  && (await tablesWhere(can('anon', 'insert, update, delete'))) === '');
+check('grants: logado lê e escreve em toda tabela do public (tabela nova sem grant falha aqui)',
+  (await tablesWhere(`not (${['select', 'insert', 'update', 'delete'].map((p) => can('authenticated', p)).join(' and ')})`)) === '');
 
 const DM = '11111111-1111-4111-8111-111111111111';
 const X  = '33333333-3333-4333-8333-333333333333';
@@ -75,7 +88,12 @@ await expectError('FK composta barra bloco apontando pra card de outra campanha'
   () => run(`insert into blocks(entity_id, campaign_id, body_md) values ('${E3}','${C}','x')`), /foreign key/);
 
 // ---------- visitante sem login (é assim que os players entram) ----------
-const visitorChecks = async (who) => {
+// O anônimo só tem SELECT (migration de grants): escrita dele falha na permissão, antes do RLS.
+// O logado sem papel tem o grant, então quem barra é o RLS (0 linhas ou erro de RLS).
+const visitorChecks = async (who, { anon }) => {
+  const writeBlocked = async (label, sql) => anon
+    ? expectError(label, () => run(sql), /permission denied/)
+    : check(label, (await changed(sql)) === 0);
   const ents = await q('select name from entities');
   check(`${who}: vê só o Frickz`, ents.length === 1 && ents[0].name === 'Frickz', JSON.stringify(ents));
   const blks = await q('select title from blocks');
@@ -83,28 +101,30 @@ const visitorChecks = async (who) => {
   check(`${who}: não vê a relação com card escondido`, (await q('select * from links')).length === 0);
   check(`${who}: vê a sessão 1 e nenhuma da campanha fechada`, (await q('select * from sessions')).length === 1);
   check(`${who}: só a campanha aberta aparece`, (await q('select * from campaigns')).length === 1);
-  check(`${who}: não vê quem é mestre`, (await q('select * from campaign_members')).length === 0);
+  if (anon) await expectError(`${who}: não vê quem é mestre`, () => q('select * from campaign_members'), /permission denied/);
+  else check(`${who}: não vê quem é mestre`, (await q('select * from campaign_members')).length === 0);
   const objs = await q('select name from storage.objects');
   check(`${who}: vê só a imagem do Frickz (nem regras privadas, nem campanha fechada)`,
     objs.length === 1 && objs[0].name.endsWith('retrato.webp'), JSON.stringify(objs));
-  check(`${who}: update em card é ignorado (0 linhas)`, (await changed(`update entities set name = 'hack'`)) === 0);
-  check(`${who}: não revela card sozinho`, (await changed(`update entities set visibility = 'party' where id = '${E2}'`)) === 0);
-  check(`${who}: não abre a campanha fechada`, (await changed(`update campaigns set is_public = true where id = '${C2}'`)) === 0);
+  await writeBlocked(`${who}: não altera card`, `update entities set name = 'hack'`);
+  await writeBlocked(`${who}: não revela card sozinho`, `update entities set visibility = 'party' where id = '${E2}'`);
+  await writeBlocked(`${who}: não abre a campanha fechada`, `update campaigns set is_public = true where id = '${C2}'`);
   await expectError(`${who}: não insere bloco`,
-    () => run(`insert into blocks(entity_id, campaign_id, body_md) values ('${E1}','${C}','x')`), /row-level security/);
+    () => run(`insert into blocks(entity_id, campaign_id, body_md) values ('${E1}','${C}','x')`),
+    anon ? /permission denied/ : /row-level security/);
   await expectError(`${who}: não sobe imagem`,
     () => run(`insert into storage.objects(bucket_id, name) values ('assets','${E1}/x.webp')`), /row-level security/);
 };
 
 console.log('\nVisitante sem login (link do Grimório)');
 await asAnon();
-await visitorChecks('anônimo');
+await visitorChecks('anônimo', { anon: true });
 await expectError('anônimo: não se coloca na mesa',
-  () => run(`insert into campaign_members values ('${C}','${X}','dm')`), /row-level security/);
+  () => run(`insert into campaign_members values ('${C}','${X}','dm')`), /permission denied/);
 
 console.log('\nLogado com Google, mas não é mestre');
 await asUser(X, 'estranho@example.com');
-await visitorChecks('logado sem papel');
+await visitorChecks('logado sem papel', { anon: false });
 await expectError('logado sem papel: não se promove a mestre',
   () => run(`insert into campaign_members values ('${C}','${X}','dm')`), /row-level security/);
 
