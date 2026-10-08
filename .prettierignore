@@ -1,0 +1,10 @@
+dist
+dev-dist
+node_modules
+package-lock.json
+# Hand-written docs and the provided SQL/test files keep their own formatting
+*.md
+docs
+supabase
+# Token table is hand-aligned on purpose
+**/tokens.css

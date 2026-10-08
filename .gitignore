@@ -1,0 +1,33 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies and builds
+node_modules
+dist
+dist-ssr
+dev-dist
+
+# Env (only .env.example is committed)
+.env
+.env.*
+!.env.example
+*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.sw?
+
+# Claude workspace files (never committed)
+CLAUDE.md
+KICKOFF.md
+MEMORY.md
+memory/
+start.md
+docs/CHECKPOINT_*.md
+.claude/
