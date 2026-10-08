@@ -41,15 +41,25 @@ check('buckets assets e rules existem e são privados',
 // ---------- grants: o que cada papel alcança antes do RLS ----------
 // Pelo oid, não pelo nome: o Postgres não garante a ordem do WHERE, e montar 'public.' || nome
 // pra uma tabela de outro schema quebra a consulta.
-const tablesWhere = async (cond) => (await q(`select c.relname as t from pg_class c
+// relkinds: r tabela, p tabela particionada, v view, m view materializada
+const tablesWhere = async (cond, kinds = "'r','p','v','m'") => (await q(`select c.relname as t from pg_class c
   join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public' and c.relkind = 'r' and ${cond} order by 1`)).map((r) => r.t).join(',');
+  where n.nspname = 'public' and c.relkind in (${kinds}) and ${cond} order by 1`)).map((r) => r.t).join(',');
 const can = (role, priv) => `has_table_privilege('${role}', c.oid, '${priv}')`;
-check('grants: anônimo só lê, e só as 5 tabelas do Grimório',
+const anyPriv = 'select, insert, update, delete, truncate, references, trigger';
+check('grants: anônimo só lê, e só as 5 tabelas do Grimório (views inclusas)',
   (await tablesWhere(can('anon', 'select'))) === 'blocks,campaigns,entities,links,sessions'
-  && (await tablesWhere(can('anon', 'insert, update, delete'))) === '');
+  && (await tablesWhere(can('anon', 'insert, update, delete, truncate, references, trigger'))) === '');
 check('grants: logado lê e escreve em toda tabela do public (tabela nova sem grant falha aqui)',
-  (await tablesWhere(`not (${['select', 'insert', 'update', 'delete'].map((p) => can('authenticated', p)).join(' and ')})`)) === '');
+  (await tablesWhere(`not (${['select', 'insert', 'update', 'delete'].map((p) => can('authenticated', p)).join(' and ')})`,
+    "'r','p'")) === '');
+
+// Sonda: tabela e view criadas DEPOIS das migrations não podem nascer abertas
+// (default privileges). Criadas e apagadas aqui, antes de qualquer outra checagem.
+await run(`create table public._sonda (id int); create view public._sonda_v as select 1 as x;`);
+check('grants: tabela e view novas nascem fechadas pra anônimo e logado',
+  (await tablesWhere(`c.relname like '\\_sonda%' and (${can('anon', anyPriv)} or ${can('authenticated', anyPriv)})`)) === '');
+await run(`drop view public._sonda_v; drop table public._sonda;`);
 
 const DM = '11111111-1111-4111-8111-111111111111';
 const X  = '33333333-3333-4333-8333-333333333333';

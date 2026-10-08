@@ -25,7 +25,7 @@ Um app só, com duas lentes: o mestre vê a campanha inteira; quem tem o link do
 
 - Leitura anônima: só `visibility = 'party'` em campanha com `is_public = true`. Revelar = publicar pra quem tem o link.
 - Escrita: só quem tem linha `role = 'dm'` em `campaign_members`.
-- Toda regra de acesso vive no RLS (migrations em `supabase/migrations`), validada por `npm run test:rls` (41 checagens). Desde 30/05/2026 o Supabase não dá grant automático nas tabelas novas: o acesso por papel vem de uma migration de grants (anon só lê).
+- Toda regra de acesso vive no RLS (migrations em `supabase/migrations`), validada por `npm run test:rls` (42 checagens). Desde 30/05/2026 o Supabase não dá grant automático nas tabelas novas: o acesso por papel vem de uma migration de grants (anon só lê).
 - Extras: login só Google; depois do primeiro login do mestre, desligar cadastro de usuários novos; `<meta name="robots" content="noindex">` no Grimório.
 
 ## Modelo de dados
