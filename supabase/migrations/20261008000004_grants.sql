@@ -1,8 +1,14 @@
 -- Muninn: quem chega a tocar em cada tabela pela API.
--- Projetos Supabase criados depois de 30/05/2026 não dão mais grant automático nas
--- tabelas novas do public (changelog 45329). Sem grant, a API responde
--- "permission denied" antes mesmo de o RLS olhar a linha.
 -- O grant decide se o papel toca na tabela; o RLS decide quais linhas ele vê.
+--
+-- Dois cenários de Supabase, e esta migration serve pros dois:
+-- - "expor tabelas automaticamente" (padrão antigo): toda tabela nova já nasce com
+--   TUDO pra anon e authenticated, inclusive TRUNCATE. Por isso o revoke vem primeiro.
+-- - padrão novo (projetos desde 30/05/2026, todos a partir de 30/10/2026, changelog 45329):
+--   tabela nova nasce sem grant e a API responde "permission denied". Por isso os grants.
+
+revoke all on campaigns, campaign_members, sessions, entities, blocks, links
+  from anon, authenticated;
 
 -- Visitante sem login (players pelo link): só lê, e só o que o Grimório usa.
 -- campaign_members fica de fora: quem é mestre não é assunto do player.

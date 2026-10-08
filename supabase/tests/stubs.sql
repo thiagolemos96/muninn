@@ -4,6 +4,11 @@ create role authenticated nologin;
 create role anon nologin;
 create role service_role nologin bypassrls;
 
+-- Pior caso, igual ao projeto real (opção "expor tabelas automaticamente"): toda
+-- tabela nova do public já nasce com tudo pra todos. A migration de grants precisa
+-- revogar o excesso; o teste de grants confere que revogou.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+
 create schema auth;
 create table auth.users (id uuid primary key, email text);
 
