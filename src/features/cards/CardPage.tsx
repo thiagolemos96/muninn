@@ -19,7 +19,7 @@ export function CardPage() {
 
   if (entity.isPending) return <Status>Carregando…</Status>;
   if (entity.isError) return <Status>Não deu pra abrir o card: {entity.error.message}</Status>;
-  if (!entity.data) return <Status>Este card não existe ou ainda não foi revelado.</Status>;
+  if (!entity.data) return <Status>Esse card não existe ou ainda não foi revelado.</Status>;
 
   const card = entity.data;
   const numbers = sessionNumbers.data ?? new Map<string, number>();
@@ -31,7 +31,7 @@ export function CardPage() {
       {card.visibility === 'dm' ? (
         <p className={styles.hidden}>
           <LockIcon />
-          Card escondido: os players ainda não veem este card.
+          Card escondido: os players ainda não veem.
         </p>
       ) : null}
 

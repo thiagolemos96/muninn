@@ -5,7 +5,7 @@ export function NotFoundPage() {
   return (
     <main className={styles.main}>
       <title>Muninn</title>
-      <Status>Esta página não existe. Confira o link.</Status>
+      <Status>Essa página não existe. Confira o link.</Status>
     </main>
   );
 }

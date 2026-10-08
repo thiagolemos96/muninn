@@ -32,7 +32,7 @@ export function GrimoireLayout() {
           <Status>Não deu pra abrir o Grimório: {campaign.error.message}</Status>
         ) : null}
         {campaign.isSuccess && !campaign.data ? (
-          <Status>Este Grimório está fechado, ou o link está errado.</Status>
+          <Status>Esse Grimório está fechado ou o link está errado.</Status>
         ) : null}
         {campaign.data ? <Outlet context={campaign.data} /> : null}
       </main>
