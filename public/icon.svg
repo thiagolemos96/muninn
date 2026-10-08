@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Provisional Muninn icon: an M on rubric red with a gold tapered rule -->
+  <rect width="512" height="512" rx="96" fill="#8C1C13"/>
+  <path d="M140 356V156l116 124 116-124v200" fill="none" stroke="#F8F2E4" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="140,398 372,409 140,420" fill="#D6B270"/>
+</svg>
