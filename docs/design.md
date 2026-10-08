@@ -2,7 +2,7 @@
 
 Conceito: **livro de horas**. De dia, velino com rubrica vermelha (tema claro, "Rubrica"). De noite, velino negro com rubrica em ouro (tema escuro, "Cinco Cabeças"). Mesma estrutura, mesmos componentes; o que muda é a tinta.
 
-Tokens prontos em `design/tokens.css` (mover para `src/styles/tokens.css`). Nunca usar cor literal em componente: sempre `var(--token)`.
+Tokens prontos em `src/styles/tokens.css`. Nunca usar cor literal em componente: sempre `var(--token)`.
 
 ## Papéis de cor
 
