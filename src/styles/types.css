@@ -1,0 +1,31 @@
+/* Card type colors. Any element with data-type="npc" (etc.) gets three local
+   variables, so components never pick a type token by hand. */
+[data-type='npc'] {
+  --t-color: var(--type-npc);
+  --t-text: var(--type-npc-text);
+  --t-bg: var(--type-npc-bg);
+}
+
+[data-type='location'] {
+  --t-color: var(--type-location);
+  --t-text: var(--type-location-text);
+  --t-bg: var(--type-location-bg);
+}
+
+[data-type='faction'] {
+  --t-color: var(--type-faction);
+  --t-text: var(--type-faction-text);
+  --t-bg: var(--type-faction-bg);
+}
+
+[data-type='item'] {
+  --t-color: var(--type-item);
+  --t-text: var(--type-item-text);
+  --t-bg: var(--type-item-bg);
+}
+
+[data-type='document'] {
+  --t-color: var(--type-document);
+  --t-text: var(--type-document-text);
+  --t-bg: var(--type-document-bg);
+}

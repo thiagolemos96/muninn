@@ -1,0 +1,34 @@
+.nav {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bar);
+  border-top: 1px solid var(--line);
+}
+
+.tab,
+.active,
+.soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  text-decoration: none;
+  color: var(--muted);
+}
+
+.active {
+  color: var(--rubric);
+  font-weight: 700;
+}
+
+.soon {
+  opacity: 0.5;
+  cursor: default;
+}

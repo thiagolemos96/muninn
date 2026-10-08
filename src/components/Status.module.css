@@ -1,0 +1,5 @@
+.status {
+  margin: var(--space-8) 0;
+  font-style: italic;
+  color: var(--muted);
+}
