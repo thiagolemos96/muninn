@@ -1,0 +1,117 @@
+/*
+  Muninn: tokens de design.
+  Conceito: livro de horas. De dia (claro), velino com rubrica vermelha.
+  De noite (escuro), velino negro com rubrica em ouro.
+  O tema vem de [data-theme] no <html>; o app define antes do primeiro paint.
+  Fontes (Google Fonts): Alegreya 400/500/700/800 + itálicos 400/500/700, Alegreya Sans 400/500/700.
+*/
+
+:root {
+  /* Tipografia */
+  --font-display: 'Alegreya', Georgia, serif;
+  --font-body: 'Alegreya', Georgia, serif;
+  --font-ui: 'Alegreya Sans', system-ui, sans-serif;
+
+  --text-xs: 0.8125rem;      /* 13px: fonte da regra, metadados */
+  --text-sm: 0.875rem;       /* 14px: rótulos de visibilidade, chips */
+  --text-ui: 0.9375rem;      /* 15px: botões, navegação */
+  --text-base: 1.0625rem;    /* 17px: corpo no celular */
+  --text-lg: 1.125rem;       /* 18px: corpo de card no desktop */
+  --text-h2: 1.3125rem;      /* 21px: título de seção no celular */
+  --text-h2-lg: 1.4375rem;   /* 23px: título de seção no desktop */
+  --text-rule-title: 1.6875rem; /* 27px: título de regra */
+  --text-name: 3rem;         /* 48px: nome do card no celular */
+  --text-name-lg: 3.625rem;  /* 58px: nome do card no desktop */
+  --leading-body: 1.55;
+  --weight-name: 800;
+  --weight-heading: 700;
+
+  /* Espaço e forma */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-card: 6px;
+  --radius-control: 8px;
+  --radius-pill: 999px;
+  --touch: 44px;            /* alvo mínimo de toque */
+  --rule-bar: 4px;          /* barras do stat block */
+}
+
+/* Claro: Rubrica */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #EFE6D2;
+  --bar: #F4ECDA;            /* topo e barras de navegação */
+  --surface: #F8F2E4;        /* card */
+  --inset: #EADFC6;          /* retrato, áreas rebaixadas */
+  --raised: #F3E5C6;         /* stat block de regra */
+  --line: #D9C9A6;           /* divisórias */
+  --gilt: #B08D57;           /* filetes dourados, bordas de controle (3:1) */
+  --ink: #2A1E17;
+  --muted: #6B5A4B;
+  --rubric: #8C1C13;         /* nome, títulos, filete afinado, capitular, item ativo */
+  --knob: #F8F2E4;           /* bolinha do interruptor */
+  --nav-active: #E6D7B5;
+  --secret: #3B3486;         /* tudo que é "só o mestre" */
+  --secret-bg: #ECE8F3;
+  --on-secret: #FFFFFF;
+  --focus: #2A1E17;
+
+  --type-npc: #B8432B;
+  --type-npc-text: #A33A24;
+  --type-npc-bg: rgba(163, 58, 36, 0.12);
+  --type-location: #3A72A8;
+  --type-location-text: #2F5F8F;
+  --type-location-bg: rgba(47, 95, 143, 0.12);
+  --type-faction: #3B8456;
+  --type-faction-text: #2F6E45;
+  --type-faction-bg: rgba(47, 110, 69, 0.12);
+  --type-item: #8A939C;
+  --type-item-text: #4E5761;
+  --type-item-bg: rgba(78, 87, 97, 0.12);
+  --type-document: #2A2730;
+  --type-document-text: #2A2730;
+  --type-document-bg: rgba(42, 39, 48, 0.10);
+}
+
+/* Escuro: Cinco Cabeças */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #16141B;
+  --bar: #1A1820;
+  --surface: #211E28;
+  --inset: #2A2633;
+  --raised: #1E1B24;
+  --line: #3A3545;
+  --gilt: #8C7445;
+  --ink: #EDE6DA;
+  --muted: #B3AA9D;
+  --rubric: #D6B270;         /* rubrica vira folha de ouro */
+  --knob: #16141B;
+  --nav-active: #2A2633;
+  --secret: #A99CF0;
+  --secret-bg: rgba(169, 156, 240, 0.08);
+  --on-secret: #16141B;
+  --focus: #EDE6DA;
+
+  --type-npc: #E0644B;
+  --type-npc-text: #F08A73;
+  --type-npc-bg: rgba(224, 100, 75, 0.16);
+  --type-location: #6FA3D6;
+  --type-location-text: #8DB8E3;
+  --type-location-bg: rgba(111, 163, 214, 0.16);
+  --type-faction: #5FAE77;
+  --type-faction-text: #86CC9C;
+  --type-faction-bg: rgba(95, 174, 119, 0.16);
+  --type-item: #E4E8EC;
+  --type-item-text: #E4E8EC;
+  --type-item-bg: rgba(228, 232, 236, 0.12);
+  --type-document: #8E8798;
+  --type-document-text: #CFC8D8;
+  --type-document-bg: rgba(142, 135, 152, 0.18);
+}
