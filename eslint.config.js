@@ -19,6 +19,10 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Same convention as TypeScript's noUnusedParameters: a leading _ means "unused on purpose"
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
   },
   {
     files: ['**/*.{js,mjs}'],

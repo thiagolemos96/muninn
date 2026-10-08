@@ -1,0 +1,45 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: var(--touch) 1fr var(--touch);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+}
+
+.back {
+  display: grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+}
+
+.title {
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: var(--weight-heading);
+  font-size: var(--text-lg);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 75ch;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}

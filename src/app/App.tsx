@@ -1,44 +1,34 @@
-import { signInWithGoogle, signOut, useDmSession } from '../features/auth/useDmSession.ts';
-import { ThemeToggle } from '../features/theme/ThemeToggle.tsx';
-import styles from './App.module.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import { CardPage } from '../features/cards/CardPage.tsx';
+import { GrimoireLayout } from '../features/campaigns/GrimoireLayout.tsx';
+import { GrimoirePage } from '../features/campaigns/GrimoirePage.tsx';
+import { HomePage } from '../features/campaigns/HomePage.tsx';
+import { NotFoundPage } from './NotFoundPage.tsx';
 
-// Temporary shell until the routes land in step 5
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 30_000, retry: 1 },
+  },
+});
+
+const router = createBrowserRouter([
+  { path: '/', element: <HomePage /> },
+  {
+    path: '/c/:slug',
+    element: <GrimoireLayout />,
+    children: [
+      { index: true, element: <GrimoirePage /> },
+      { path: 'e/:id', element: <CardPage /> },
+    ],
+  },
+  { path: '*', element: <NotFoundPage /> },
+]);
+
 export function App() {
-  const auth = useDmSession();
-
   return (
-    <div className={styles.page}>
-      <header className={styles.top}>
-        <span className={styles.brand}>Muninn</span>
-        <div className={styles.actions}>
-          {auth.status === 'signed-in' ? (
-            <>
-              <span className={styles.who}>{auth.session.user.email}</span>
-              <button type="button" className={styles.button} onClick={() => void signOut()}>
-                Sair
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className={styles.button}
-              disabled={auth.status === 'loading'}
-              onClick={() => void signInWithGoogle()}
-            >
-              Entrar com Google
-            </button>
-          )}
-          <ThemeToggle />
-        </div>
-      </header>
-      <main className={styles.main}>
-        <h1 className={styles.name}>Frickz</h1>
-        <p className={styles.kind}>NPC, goblin artífice</p>
-        <p>
-          Alegreya no texto de conteúdo, com entrelinha de 1.55 e no máximo uns 75 caracteres por
-          linha. A interface usa Alegreya Sans.
-        </p>
-      </main>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 }

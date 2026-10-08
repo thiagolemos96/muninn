@@ -1,0 +1,56 @@
+import { useParams } from 'react-router';
+import { BlockSection } from '../../components/BlockSection.tsx';
+import { CardHeader } from '../../components/CardHeader.tsx';
+import { LockIcon } from '../../components/icons.tsx';
+import { Status } from '../../components/Status.tsx';
+import { useCampaignContext } from '../campaigns/campaignContext.ts';
+import { useBlocks, useEntity, useSessionNumbers } from './queries.ts';
+import { visibilityLabel } from './visibilityLabel.ts';
+import styles from './CardPage.module.css';
+
+// "/c/:slug/e/:id": the card with every block this viewer may see.
+// The DM also gets the 'dm' blocks, drawn as secret blocks.
+export function CardPage() {
+  const { id = '' } = useParams();
+  const campaign = useCampaignContext();
+  const entity = useEntity(campaign.id, id);
+  const blocks = useBlocks(entity.data?.id);
+  const sessionNumbers = useSessionNumbers(campaign.id);
+
+  if (entity.isPending) return <Status>Carregando…</Status>;
+  if (entity.isError) return <Status>Não deu pra abrir o card: {entity.error.message}</Status>;
+  if (!entity.data) return <Status>Este card não existe ou ainda não foi revelado.</Status>;
+
+  const card = entity.data;
+  const numbers = sessionNumbers.data ?? new Map<string, number>();
+
+  return (
+    <article>
+      <title>{`${card.name} · ${campaign.name}`}</title>
+
+      {card.visibility === 'dm' ? (
+        <p className={styles.hidden}>
+          <LockIcon />
+          Card escondido: os players ainda não veem este card.
+        </p>
+      ) : null}
+
+      <CardHeader type={card.type} name={card.name} summary={card.summary} />
+
+      {blocks.isPending ? <Status>Carregando…</Status> : null}
+      {blocks.isError ? (
+        <Status>Não deu pra carregar o texto do card: {blocks.error.message}</Status>
+      ) : null}
+
+      {blocks.data?.map((block) => (
+        <BlockSection
+          key={block.id}
+          title={block.title}
+          bodyMd={block.body_md}
+          secret={block.visibility === 'dm'}
+          label={visibilityLabel(block.visibility, block.revealed_in, numbers)}
+        />
+      ))}
+    </article>
+  );
+}
