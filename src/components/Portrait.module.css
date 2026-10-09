@@ -1,0 +1,36 @@
+.portrait {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 4 / 5;
+  margin: 0 auto var(--space-6);
+  padding: 12px;
+  background: var(--inset);
+  border: 1px solid var(--gilt);
+  border-radius: var(--radius-card);
+  box-shadow:
+    inset 0 0 0 5px var(--surface),
+    inset 0 0 0 6px var(--gilt);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.empty {
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* Desktop: the portrait sits beside the text, like a plate in a book */
+@media (min-width: 768px) {
+  .portrait {
+    float: right;
+    width: 260px;
+    margin: 0 0 var(--space-4) var(--space-6);
+  }
+}
