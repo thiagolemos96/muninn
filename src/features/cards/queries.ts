@@ -37,7 +37,7 @@ export function useEntity(campaignId: string, id: string) {
       if (!uuidPattern.test(id)) return null;
       const { data, error } = await supabase
         .from('entities')
-        .select('id, type, name, summary, visibility')
+        .select('id, type, name, summary, tags, visibility')
         .eq('campaign_id', campaignId)
         .eq('id', id)
         .maybeSingle();

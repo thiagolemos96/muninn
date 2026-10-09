@@ -21,6 +21,29 @@
   height: 16px;
 }
 
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.newCard {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--rubric);
+  border-radius: var(--radius-control);
+  background: var(--rubric);
+  color: var(--surface);
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .preview {
   display: flex;
   align-items: center;

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { BlockSection } from '../../components/BlockSection.tsx';
 import { CardHeader } from '../../components/CardHeader.tsx';
 import { LockIcon } from '../../components/icons.tsx';
@@ -17,7 +17,7 @@ export function CardPage() {
   const entity = useEntity(campaign.id, id);
   const blocks = useBlocks(entity.data?.id);
   const sessionNumbers = useSessionNumbers(campaign.id);
-  const { asPlayer } = useViewMode(campaign.id);
+  const { isDm, asPlayer } = useViewMode(campaign.id);
 
   // In the DM's player preview, hide what the public RLS policies would hide
   const hiddenFromPlayer = asPlayer && (!campaign.is_public || entity.data?.visibility === 'dm');
@@ -36,11 +36,20 @@ export function CardPage() {
     <article>
       <title>{`${card.name} · ${campaign.name}`}</title>
 
-      {card.visibility === 'dm' ? (
-        <p className={styles.hidden}>
-          <LockIcon />
-          Card escondido: os players ainda não veem.
-        </p>
+      {isDm && !asPlayer ? (
+        <div className={styles.dmBar}>
+          {card.visibility === 'dm' ? (
+            <p className={styles.hidden}>
+              <LockIcon />
+              Card escondido: os players ainda não veem.
+            </p>
+          ) : (
+            <span />
+          )}
+          <Link to="editar" className={styles.edit}>
+            Editar
+          </Link>
+        </div>
       ) : null}
 
       <CardHeader type={card.type} name={card.name} summary={card.summary} />

@@ -36,7 +36,14 @@ export function GrimoirePage() {
     <>
       <title>{`${campaign.name} · Muninn`}</title>
       {asPlayer ? <PreviewNote /> : null}
-      <h1 className={styles.heading}>{isDm && !asPlayer ? 'Cards' : 'Grimório'}</h1>
+      <div className={styles.titleRow}>
+        <h1 className={styles.heading}>{isDm && !asPlayer ? 'Cards' : 'Grimório'}</h1>
+        {isDm && !asPlayer ? (
+          <Link to="novo" className={styles.newCard}>
+            Novo card
+          </Link>
+        ) : null}
+      </div>
 
       {/* Only the DM can load a closed campaign, so this note is for them */}
       {!campaign.is_public && !asPlayer ? (
