@@ -5,7 +5,7 @@ import { useIsDm } from './queries.ts';
 // RLS policies would hide (closed campaign, 'dm' cards and blocks). It is only a
 // preview: what is fetched is still decided by RLS.
 export function useViewMode(campaignId: string) {
-  const isDm = useIsDm(campaignId);
+  const { isDm, ready } = useIsDm(campaignId);
   const viewAsPlayer = useUiStore((state) => state.viewAsPlayer);
-  return { isDm, asPlayer: isDm && viewAsPlayer };
+  return { isDm, ready, asPlayer: isDm && viewAsPlayer };
 }

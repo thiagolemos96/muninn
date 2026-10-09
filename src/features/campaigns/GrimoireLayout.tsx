@@ -13,8 +13,19 @@ import styles from './GrimoireLayout.module.css';
 export function GrimoireLayout() {
   const { slug = '', id } = useParams();
   const campaign = useCampaign(slug);
-  const isDm = useIsDm(campaign.data?.id ?? '');
+  const { isDm, ready } = useIsDm(campaign.data?.id ?? '');
   const backTo = id ? `/c/${slug}` : undefined;
+
+  // Pick the chrome only once we know who is looking
+  if (campaign.isPending || (campaign.data && !ready)) {
+    return (
+      <div className={styles.page}>
+        <main className={styles.main}>
+          <Status>Carregando…</Status>
+        </main>
+      </div>
+    );
+  }
 
   const body = (
     <>

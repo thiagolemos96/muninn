@@ -66,6 +66,8 @@ export function useCampaign(slug: string) {
 
 // Is the signed-in user DM of this campaign? Anonymous visitors are never asked:
 // they have no grant on campaign_members, and the answer is always no.
+// ready: the answer is known. Until then screens wait instead of guessing "player",
+// which would flash the player chrome (or "Só o mestre edita cards") at the DM.
 export function useIsDm(campaignId: string) {
   const auth = useDmSession();
   const userId = auth.status === 'signed-in' ? auth.session.user.id : null;
@@ -86,7 +88,9 @@ export function useIsDm(campaignId: string) {
       return data !== null;
     },
   });
-  return query.data === true;
+  const ready =
+    auth.status !== 'loading' && (userId === null || campaignId === '' || !query.isPending);
+  return { isDm: query.data === true, ready };
 }
 
 // "Grimório aberto" switch. RLS only lets the DM update the campaign.
