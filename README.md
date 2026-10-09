@@ -41,14 +41,19 @@ A ordem importa: o seed precisa do seu usuário, e o usuário só existe depois 
 1. Crie o projeto em [supabase.com](https://supabase.com) (o plano Free basta).
 2. No **SQL Editor**, rode cada arquivo de `supabase/migrations/` em ordem de nome, um por vez.
    Não rode `supabase/tests/stubs.sql`: ele imita o Supabase só pros testes.
+   Na primeira, o editor avisa que as tabelas nascem sem RLS: pode escolher "Run and enable RLS" (a 002 liga o RLS de qualquer jeito).
+   Se o projeto estiver ligado ao GitHub, deixe **"Deploy to production"** desligado: as migrations foram aplicadas à mão e o deploy tentaria criar tudo de novo. Pra ligar um dia, marque antes as já aplicadas com `supabase migration repair --status applied`.
 3. Em **Project Settings > API Keys**, copie a Project URL e a publishable key (`sb_publishable_...`). Elas vão no `.env.local` e no Cloudflare. A secret key nunca sai do painel.
 
 ### 2. Google e login
 
-1. No [Google Cloud Console](https://console.cloud.google.com), crie um projeto e configure a tela de consentimento (Google Auth Platform > Branding e Audience). Pode deixar em "Testing" e adicionar o seu Gmail como test user.
-2. Em **Clients**, crie um client do tipo **Web application**. Em "Authorized redirect URIs", ponha `https://<ref-do-projeto>.supabase.co/auth/v1/callback`.
-3. No Supabase, vá em **Authentication > Sign In / Providers**: ligue o **Google** com o Client ID e o Client Secret, e desligue o **Email**.
-4. Em **Authentication > URL Configuration**:
+1. No [Google Cloud Console](https://console.cloud.google.com), crie um projeto e configure a tela de consentimento (Google Auth Platform > Visão geral > Vamos começar), com público **Externo**.
+2. Em **Público-alvo**, adicione o seu Gmail em **Usuários de teste**. O app fica em "Testando", e sem isso o Google bloqueia o seu próprio login.
+3. Em **Clientes**, crie um client do tipo **Aplicativo da Web**. Em "URIs de redirecionamento autorizados", ponha `https://<ref-do-projeto>.supabase.co/auth/v1/callback`.
+   O Google mostra o Client Secret **uma vez só**, na hora de criar. Perdeu? Abra o client, painel ⓘ, **Add secret**, e desative o antigo.
+4. No Supabase, vá em **Authentication > Sign In / Providers**: ligue o **Google** com o Client ID e o Client Secret, e desligue o **Email**.
+   Depois de salvar, confira que o Google aparece como **ENABLED** na lista.
+5. Em **Authentication > URL Configuration**:
    - Site URL: `http://localhost:5173` por enquanto (troque pela URL do Pages no passo 4).
    - Redirect URLs: `http://localhost:5173/**`.
 
@@ -84,6 +89,7 @@ Detalhes que mordem:
 
 - O Supabase Free pausa o projeto depois de uma semana sem atividade e não faz backup automático. As mitigações (consulta periódica e exportação) estão no `docs/escopo.md` e ainda não foram feitas.
 - Mudou o schema ou uma política? Crie uma migration nova (nunca edite uma já aplicada), adicione o caso em `supabase/tests/rls.test.mjs` e rode `npm run test:rls`.
+- Tabela nova nasce **sem acesso** pra `anon` e `authenticated` (migration 005). A migration que cria a tabela também dá os `grant` que ela precisa; o teste falha se faltar.
 
 ## Documentação
 
