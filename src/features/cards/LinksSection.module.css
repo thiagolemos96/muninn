@@ -1,0 +1,83 @@
+.section {
+  margin-top: var(--space-8);
+}
+
+.title {
+  font-weight: var(--weight-heading);
+  font-size: var(--text-h2);
+  color: var(--rubric);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item,
+.secret {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-card);
+}
+
+.secret {
+  border: 1.5px dashed var(--secret);
+  background: var(--secret-bg);
+}
+
+.sentence {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.self {
+  font-weight: 700;
+}
+
+.label {
+  font-style: italic;
+  color: var(--muted);
+}
+
+.other {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch);
+  color: var(--rubric);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.otherName {
+  text-decoration: underline;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--secret);
+}
+
+.mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: var(--text-h2-lg);
+  }
+}

@@ -67,6 +67,31 @@ export function useBlocks(entityId: string | undefined) {
   });
 }
 
+// Links in both directions, with both ends embedded. RLS applies to the embedded
+// cards too, so an end this viewer may not see comes back as null.
+export function useLinks(entityId: string | undefined) {
+  const viewer = useViewer();
+
+  return useQuery({
+    queryKey: ['links', viewer.id, entityId],
+    enabled: viewer.ready && entityId !== undefined,
+    queryFn: async () => {
+      if (!entityId || !uuidPattern.test(entityId)) return [];
+      const { data, error } = await supabase
+        .from('links')
+        .select(
+          `id, label, visibility, revealed_in,
+           from:entities!links_from_id_campaign_id_fkey(id, name, type, visibility),
+           to:entities!links_to_id_campaign_id_fkey(id, name, type, visibility)`,
+        )
+        .or(`from_id.eq.${entityId},to_id.eq.${entityId}`)
+        .order('label');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 // sessions.id -> sessions.number, for "Grupo, desde a sessão N"
 export function useSessionNumbers(campaignId: string) {
   const viewer = useViewer();

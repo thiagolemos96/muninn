@@ -5,7 +5,8 @@ import { LockIcon } from '../../components/icons.tsx';
 import { Status } from '../../components/Status.tsx';
 import { useCampaignContext } from '../campaigns/campaignContext.ts';
 import { useViewMode } from '../campaigns/viewMode.ts';
-import { useBlocks, useEntity, useSessionNumbers } from './queries.ts';
+import { LinksSection } from './LinksSection.tsx';
+import { useBlocks, useEntity, useLinks, useSessionNumbers } from './queries.ts';
 import { visibilityLabel } from './visibilityLabel.ts';
 import styles from './CardPage.module.css';
 
@@ -16,6 +17,7 @@ export function CardPage() {
   const campaign = useCampaignContext();
   const entity = useEntity(campaign.id, id);
   const blocks = useBlocks(entity.data?.id);
+  const links = useLinks(entity.data?.id);
   const sessionNumbers = useSessionNumbers(campaign.id);
   const { isDm, asPlayer } = useViewMode(campaign.id);
 
@@ -68,6 +70,15 @@ export function CardPage() {
           label={visibilityLabel(block.visibility, block.revealed_in, numbers)}
         />
       ))}
+
+      {links.data ? (
+        <LinksSection
+          entityId={card.id}
+          slug={campaign.slug}
+          links={links.data}
+          asPlayer={asPlayer}
+        />
+      ) : null}
     </article>
   );
 }
