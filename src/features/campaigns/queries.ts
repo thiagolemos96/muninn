@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase.ts';
 import { useDmSession } from '../auth/useDmSession.ts';
 
@@ -60,6 +60,50 @@ export function useCampaign(slug: string) {
         .maybeSingle();
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+// Is the signed-in user DM of this campaign? Anonymous visitors are never asked:
+// they have no grant on campaign_members, and the answer is always no.
+export function useIsDm(campaignId: string) {
+  const auth = useDmSession();
+  const userId = auth.status === 'signed-in' ? auth.session.user.id : null;
+
+  const query = useQuery({
+    queryKey: ['is-dm', userId, campaignId],
+    enabled: userId !== null && campaignId !== '',
+    queryFn: async () => {
+      if (!userId) return false;
+      const { data, error } = await supabase
+        .from('campaign_members')
+        .select('role')
+        .eq('campaign_id', campaignId)
+        .eq('user_id', userId)
+        .eq('role', 'dm')
+        .maybeSingle();
+      if (error) throw error;
+      return data !== null;
+    },
+  });
+  return query.data === true;
+}
+
+// "Grimório aberto" switch. RLS only lets the DM update the campaign.
+export function useSetCampaignPublic() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, isPublic }: { id: string; isPublic: boolean }) => {
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ is_public: isPublic })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['campaign'] });
+      void queryClient.invalidateQueries({ queryKey: ['my-campaigns'] });
     },
   });
 }

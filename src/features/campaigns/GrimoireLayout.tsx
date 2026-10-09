@@ -3,20 +3,52 @@ import { BottomNav } from '../../components/BottomNav.tsx';
 import { BackIcon } from '../../components/icons.tsx';
 import { Status } from '../../components/Status.tsx';
 import { ThemeToggle } from '../theme/ThemeToggle.tsx';
-import { useCampaign } from './queries.ts';
+import { DmSidebar } from './DmSidebar.tsx';
+import { DmTopBar } from './DmTopBar.tsx';
+import { useCampaign, useIsDm } from './queries.ts';
 import styles from './GrimoireLayout.module.css';
 
-// "/c/:slug/*": top bar, the page, bottom bar. Same screen for players and the DM;
-// RLS decides what each one gets.
+// "/c/:slug/*": same pages for players and the DM; RLS decides what each one gets.
+// The DM gets the Escudo chrome around them (top bar with controls, sidebar on desktop).
 export function GrimoireLayout() {
   const { slug = '', id } = useParams();
   const campaign = useCampaign(slug);
+  const isDm = useIsDm(campaign.data?.id ?? '');
+  const backTo = id ? `/c/${slug}` : undefined;
+
+  const body = (
+    <>
+      {campaign.isPending ? <Status>Carregando…</Status> : null}
+      {campaign.isError ? (
+        <Status>Não deu pra abrir o Grimório: {campaign.error.message}</Status>
+      ) : null}
+      {campaign.isSuccess && !campaign.data ? (
+        <Status>Esse Grimório está fechado ou o link está errado.</Status>
+      ) : null}
+      {campaign.data ? <Outlet context={campaign.data} /> : null}
+    </>
+  );
+
+  if (isDm && campaign.data) {
+    return (
+      <div className={styles.page}>
+        <DmTopBar campaign={campaign.data} backTo={backTo} />
+        <div className={styles.columns}>
+          <DmSidebar slug={slug} />
+          <main className={styles.main}>{body}</main>
+        </div>
+        <div className={styles.phoneOnly}>
+          <BottomNav slug={slug} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
       <header className={styles.top}>
-        {id ? (
-          <Link to={`/c/${slug}`} className={styles.back} aria-label="Voltar pro Grimório">
+        {backTo ? (
+          <Link to={backTo} className={styles.back} aria-label="Voltar pro Grimório">
             <BackIcon />
           </Link>
         ) : (
@@ -26,16 +58,7 @@ export function GrimoireLayout() {
         <ThemeToggle />
       </header>
 
-      <main className={styles.main}>
-        {campaign.isPending ? <Status>Carregando…</Status> : null}
-        {campaign.isError ? (
-          <Status>Não deu pra abrir o Grimório: {campaign.error.message}</Status>
-        ) : null}
-        {campaign.isSuccess && !campaign.data ? (
-          <Status>Esse Grimório está fechado ou o link está errado.</Status>
-        ) : null}
-        {campaign.data ? <Outlet context={campaign.data} /> : null}
-      </main>
+      <main className={styles.main}>{body}</main>
 
       <BottomNav slug={slug} />
     </div>

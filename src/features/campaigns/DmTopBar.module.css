@@ -1,0 +1,91 @@
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.back {
+  display: grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: var(--weight-name);
+  font-size: var(--text-h2);
+  color: var(--rubric);
+  text-decoration: none;
+}
+
+.campaign {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: var(--weight-heading);
+  font-size: var(--text-lg);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.session {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--gilt);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.preview {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--gilt);
+  border-radius: var(--radius-control);
+  background: transparent;
+  font-size: var(--text-ui);
+  cursor: pointer;
+}
+
+.preview[aria-pressed='true'] {
+  border-color: var(--secret);
+  background: var(--secret);
+  color: var(--on-secret);
+}
+
+.error {
+  flex-basis: 100%;
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--rubric);
+}
