@@ -29,6 +29,24 @@
   gap: var(--space-2) var(--space-4);
 }
 
+.titleActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.importLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--gilt);
+  border-radius: var(--radius-control);
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  color: var(--ink);
+  text-decoration: none;
+}
+
 .newCard {
   display: inline-flex;
   align-items: center;

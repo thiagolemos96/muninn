@@ -39,9 +39,14 @@ export function GrimoirePage() {
       <div className={styles.titleRow}>
         <h1 className={styles.heading}>{isDm && !asPlayer ? 'Cards' : 'Grimório'}</h1>
         {isDm && !asPlayer ? (
-          <Link to="novo" className={styles.newCard}>
-            Novo card
-          </Link>
+          <span className={styles.titleActions}>
+            <Link to="importar" className={styles.importLink}>
+              Importar
+            </Link>
+            <Link to="novo" className={styles.newCard}>
+              Novo card
+            </Link>
+          </span>
         ) : null}
       </div>
 

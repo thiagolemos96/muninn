@@ -5,6 +5,7 @@ import { CardPage } from '../features/cards/CardPage.tsx';
 import { GrimoireLayout } from '../features/campaigns/GrimoireLayout.tsx';
 import { GrimoirePage } from '../features/campaigns/GrimoirePage.tsx';
 import { HomePage } from '../features/campaigns/HomePage.tsx';
+import { ImportPage } from '../features/import/ImportPage.tsx';
 import { NotFoundPage } from './NotFoundPage.tsx';
 
 const queryClient = new QueryClient({
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <GrimoirePage /> },
       { path: 'novo', element: <CardEditorPage /> },
+      { path: 'importar', element: <ImportPage /> },
       { path: 'e/:id', element: <CardPage /> },
       { path: 'e/:id/editar', element: <CardEditorPage /> },
     ],
