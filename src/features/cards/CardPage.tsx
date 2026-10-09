@@ -4,6 +4,7 @@ import { CardHeader } from '../../components/CardHeader.tsx';
 import { LockIcon } from '../../components/icons.tsx';
 import { Status } from '../../components/Status.tsx';
 import { useCampaignContext } from '../campaigns/campaignContext.ts';
+import { useViewMode } from '../campaigns/viewMode.ts';
 import { useBlocks, useEntity, useSessionNumbers } from './queries.ts';
 import { visibilityLabel } from './visibilityLabel.ts';
 import styles from './CardPage.module.css';
@@ -16,13 +17,20 @@ export function CardPage() {
   const entity = useEntity(campaign.id, id);
   const blocks = useBlocks(entity.data?.id);
   const sessionNumbers = useSessionNumbers(campaign.id);
+  const { asPlayer } = useViewMode(campaign.id);
+
+  // In the DM's player preview, hide what the public RLS policies would hide
+  const hiddenFromPlayer = asPlayer && (!campaign.is_public || entity.data?.visibility === 'dm');
 
   if (entity.isPending) return <Status>Carregando…</Status>;
   if (entity.isError) return <Status>Não deu pra abrir o card: {entity.error.message}</Status>;
-  if (!entity.data) return <Status>Esse card não existe ou ainda não foi revelado.</Status>;
+  if (!entity.data || hiddenFromPlayer) {
+    return <Status>Esse card não existe ou ainda não foi revelado.</Status>;
+  }
 
   const card = entity.data;
   const numbers = sessionNumbers.data ?? new Map<string, number>();
+  const visibleBlocks = blocks.data?.filter((block) => !asPlayer || block.visibility === 'party');
 
   return (
     <article>
@@ -42,7 +50,7 @@ export function CardPage() {
         <Status>Não deu pra carregar o texto do card: {blocks.error.message}</Status>
       ) : null}
 
-      {blocks.data?.map((block) => (
+      {visibleBlocks?.map((block) => (
         <BlockSection
           key={block.id}
           title={block.title}
