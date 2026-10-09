@@ -70,6 +70,14 @@ export function ScalesIcon() {
   );
 }
 
+export function ScrollIcon() {
+  return (
+    <Icon>
+      <path d="M8 3h11v15a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2h11v2a3 3 0 0 0 3 3M8 3a3 3 0 0 0-3 3v10M11 8h5M11 12h5" />
+    </Icon>
+  );
+}
+
 export function SearchIcon() {
   return (
     <Icon>
