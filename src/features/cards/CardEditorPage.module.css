@@ -92,6 +92,56 @@
   color: var(--muted);
 }
 
+.portraitField {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.portraitField > figure {
+  float: none;
+  width: 160px;
+  margin: 0;
+}
+
+.portraitField > .field {
+  flex: 1 1 220px;
+}
+
+.fieldLabel {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.fileButton {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: var(--touch);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--gilt);
+  border-radius: var(--radius-control);
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  cursor: pointer;
+}
+
+.fileButton:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .linkSentence {
   display: flex;
   flex-wrap: wrap;

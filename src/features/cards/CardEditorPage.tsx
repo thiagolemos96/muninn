@@ -6,11 +6,13 @@ import { useCampaignContext } from '../campaigns/campaignContext.ts';
 import { useViewMode } from '../campaigns/viewMode.ts';
 import { ENTITY_TYPES, TYPE_LABEL, type EntityType } from './entityTypes.ts';
 import { LinksEditor } from './LinksEditor.tsx';
+import { PortraitField } from './PortraitField.tsx';
 import {
   useDeleteCard,
   useSaveCard,
   type BlockDraft,
   type CardDraft,
+  type ImageChange,
   type LinkDraft,
 } from './mutations.ts';
 import { useBlocks, useEntities, useEntity, useLinks } from './queries.ts';
@@ -46,6 +48,7 @@ export function CardEditorPage() {
     return (
       <CardForm
         key="new"
+        initialImagePath={null}
         isNew
         initialCard={blank}
         initialBlocks={[]}
@@ -65,6 +68,7 @@ export function CardEditorPage() {
   return (
     <CardForm
       key={card.id}
+      initialImagePath={card.image_path}
       isNew={false}
       initialCard={{
         id: card.id,
@@ -103,10 +107,18 @@ type FormProps = {
   initialCard: CardDraft;
   initialBlocks: BlockDraft[];
   initialLinks: LinkDraft[];
+  initialImagePath: string | null;
   cards: { id: string; name: string; type: EntityType }[];
 };
 
-function CardForm({ isNew, initialCard, initialBlocks, initialLinks, cards }: FormProps) {
+function CardForm({
+  isNew,
+  initialCard,
+  initialBlocks,
+  initialLinks,
+  initialImagePath,
+  cards,
+}: FormProps) {
   const campaign = useCampaignContext();
   const navigate = useNavigate();
   const save = useSaveCard();
@@ -116,6 +128,7 @@ function CardForm({ isNew, initialCard, initialBlocks, initialLinks, cards }: Fo
   const [tagsText, setTagsText] = useState(initialCard.tags.join(', '));
   const [blocks, setBlocks] = useState(initialBlocks);
   const [links, setLinks] = useState(initialLinks);
+  const [image, setImage] = useState<ImageChange>({ kind: 'keep' });
   const [linkProblem, setLinkProblem] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [nameMissing, setNameMissing] = useState(false);
@@ -164,6 +177,8 @@ function CardForm({ isNew, initialCard, initialBlocks, initialLinks, cards }: Fo
         blocks,
         links,
         removedBlockIds: initialBlocks.map((b) => b.id).filter((blockId) => !keptIds.has(blockId)),
+        image,
+        previousImagePath: initialImagePath,
         removedLinkIds: initialLinks.map((l) => l.id).filter((linkId) => !keptLinkIds.has(linkId)),
       },
       { onSuccess: () => void navigate(cardPath) },
@@ -251,6 +266,8 @@ function CardForm({ isNew, initialCard, initialBlocks, initialLinks, cards }: Fo
           Separadas por vírgula.
         </p>
       </div>
+
+      <PortraitField currentPath={initialImagePath} change={image} onChange={setImage} />
 
       <h2 className={styles.subheading}>Blocos</h2>
       {blocks.length === 0 ? <p className={styles.hint}>Nenhum bloco ainda.</p> : null}

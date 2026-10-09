@@ -37,7 +37,7 @@ export function useEntity(campaignId: string, id: string) {
       if (!uuidPattern.test(id)) return null;
       const { data, error } = await supabase
         .from('entities')
-        .select('id, type, name, summary, tags, visibility')
+        .select('id, type, name, summary, tags, image_path, visibility')
         .eq('campaign_id', campaignId)
         .eq('id', id)
         .maybeSingle();
@@ -106,6 +106,24 @@ export function useSessionNumbers(campaignId: string) {
         .eq('campaign_id', campaignId);
       if (error) throw error;
       return new Map(data.map((s) => [s.id, s.number]));
+    },
+  });
+}
+
+// Private bucket: the picture is shown through a short-lived signed URL. Creating it
+// passes through the Storage policies, so a player only gets one for a revealed card.
+export function useSignedImage(path: string | null) {
+  const viewer = useViewer();
+
+  return useQuery({
+    queryKey: ['image', viewer.id, path],
+    enabled: viewer.ready && path !== null,
+    staleTime: 50 * 60_000, // the URL lives one hour; renew before it expires
+    queryFn: async () => {
+      if (!path) return null;
+      const { data, error } = await supabase.storage.from('assets').createSignedUrl(path, 3600);
+      if (error) throw error;
+      return data.signedUrl;
     },
   });
 }

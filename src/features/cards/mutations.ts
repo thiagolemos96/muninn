@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Enums } from '../../lib/database.types.ts';
+import { extensionFor } from '../../lib/image.ts';
 import { supabase } from '../../lib/supabase.ts';
 import type { EntityType } from './entityTypes.ts';
 
@@ -30,6 +31,10 @@ export type LinkDraft = {
   visibility: Visibility;
 };
 
+// What to do with the portrait on save. The upload waits for the save because the
+// Storage policy only lets the DM write under {entity_id}/ once that card exists.
+export type ImageChange = { kind: 'keep' } | { kind: 'replace'; blob: Blob } | { kind: 'remove' };
+
 type SaveInput = {
   campaignId: string;
   card: CardDraft;
@@ -38,6 +43,8 @@ type SaveInput = {
   // Rows that existed when the editor opened and were removed since
   removedBlockIds: string[];
   removedLinkIds: string[];
+  image: ImageChange;
+  previousImagePath: string | null;
 };
 
 // Ids are created in the browser (crypto.randomUUID), so a new card and its new blocks
@@ -55,6 +62,8 @@ export function useSaveCard() {
       links,
       removedBlockIds,
       removedLinkIds,
+      image,
+      previousImagePath,
     }: SaveInput) => {
       const entity = await supabase.from('entities').upsert({
         id: card.id,
@@ -67,6 +76,25 @@ export function useSaveCard() {
         updated_at: new Date().toISOString(),
       });
       if (entity.error) throw entity.error;
+
+      if (image.kind !== 'keep') {
+        let imagePath: string | null = null;
+        if (image.kind === 'replace') {
+          // A new name on every upload, so no browser or CDN serves the old picture
+          imagePath = `${card.id}/retrato-${Date.now()}.${extensionFor(image.blob)}`;
+          const uploaded = await supabase.storage
+            .from('assets')
+            .upload(imagePath, image.blob, { contentType: image.blob.type });
+          if (uploaded.error) throw uploaded.error;
+        }
+        const updated = await supabase
+          .from('entities')
+          .update({ image_path: imagePath })
+          .eq('id', card.id);
+        if (updated.error) throw updated.error;
+        // Best effort: an orphaned old file costs storage, not correctness
+        if (previousImagePath) await supabase.storage.from('assets').remove([previousImagePath]);
+      }
 
       if (removedBlockIds.length > 0) {
         const removed = await supabase.from('blocks').delete().in('id', removedBlockIds);
@@ -119,6 +147,16 @@ export function useDeleteCard() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Files first: once the card is gone, the Storage policy can no longer tell
+      // who owns {id}/..., and the files could not be deleted anymore
+      const listed = await supabase.storage.from('assets').list(id);
+      if (listed.error) throw listed.error;
+      if (listed.data.length > 0) {
+        const removed = await supabase.storage
+          .from('assets')
+          .remove(listed.data.map((file) => `${id}/${file.name}`));
+        if (removed.error) throw removed.error;
+      }
       const { error } = await supabase.from('entities').delete().eq('id', id);
       if (error) throw error;
     },
@@ -127,7 +165,7 @@ export function useDeleteCard() {
 }
 
 function invalidateCards(queryClient: ReturnType<typeof useQueryClient>) {
-  for (const key of ['entities', 'entity', 'blocks', 'links']) {
+  for (const key of ['entities', 'entity', 'blocks', 'links', 'image']) {
     void queryClient.invalidateQueries({ queryKey: [key] });
   }
 }

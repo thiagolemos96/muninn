@@ -2,11 +2,12 @@ import { Link, useParams } from 'react-router';
 import { BlockSection } from '../../components/BlockSection.tsx';
 import { CardHeader } from '../../components/CardHeader.tsx';
 import { LockIcon } from '../../components/icons.tsx';
+import { Portrait } from '../../components/Portrait.tsx';
 import { Status } from '../../components/Status.tsx';
 import { useCampaignContext } from '../campaigns/campaignContext.ts';
 import { useViewMode } from '../campaigns/viewMode.ts';
 import { LinksSection } from './LinksSection.tsx';
-import { useBlocks, useEntity, useLinks, useSessionNumbers } from './queries.ts';
+import { useBlocks, useEntity, useLinks, useSessionNumbers, useSignedImage } from './queries.ts';
 import { visibilityLabel } from './visibilityLabel.ts';
 import styles from './CardPage.module.css';
 
@@ -18,6 +19,7 @@ export function CardPage() {
   const entity = useEntity(campaign.id, id);
   const blocks = useBlocks(entity.data?.id);
   const links = useLinks(entity.data?.id);
+  const image = useSignedImage(entity.data?.image_path ?? null);
   const sessionNumbers = useSessionNumbers(campaign.id);
   const { isDm, asPlayer } = useViewMode(campaign.id);
 
@@ -56,17 +58,20 @@ export function CardPage() {
 
       <CardHeader type={card.type} name={card.name} summary={card.summary} />
 
+      {card.image_path ? <Portrait src={image.data} alt={`Retrato: ${card.name}`} /> : null}
+
       {blocks.isPending ? <Status>Carregando…</Status> : null}
       {blocks.isError ? (
         <Status>Não deu pra carregar o texto do card: {blocks.error.message}</Status>
       ) : null}
 
-      {visibleBlocks?.map((block) => (
+      {visibleBlocks?.map((block, index) => (
         <BlockSection
           key={block.id}
           title={block.title}
           bodyMd={block.body_md}
           secret={block.visibility === 'dm'}
+          dropCap={index === 0}
           label={visibilityLabel(block.visibility, block.revealed_in, numbers)}
         />
       ))}
