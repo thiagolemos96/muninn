@@ -2,12 +2,13 @@ import { Link } from 'react-router';
 import { BackIcon, EyeIcon } from '../../components/icons.tsx';
 import { Switch } from '../../components/Switch.tsx';
 import { useSessionNumbers } from '../cards/queries.ts';
+import { SearchButton } from '../search/SearchButton.tsx';
 import { ThemeToggle } from '../theme/ThemeToggle.tsx';
 import { useUiStore } from '../ui/uiStore.ts';
 import { useSetCampaignPublic, type CampaignSummary } from './queries.ts';
 import styles from './DmTopBar.module.css';
 
-// docs/design.md, component 10 (Escudo). Search arrives in step 5.
+// docs/design.md, component 10 (Escudo).
 export function DmTopBar({ campaign, backTo }: { campaign: CampaignSummary; backTo?: string }) {
   const sessions = useSessionNumbers(campaign.id);
   const setPublic = useSetCampaignPublic();
@@ -33,6 +34,7 @@ export function DmTopBar({ campaign, backTo }: { campaign: CampaignSummary; back
       </div>
 
       <div className={styles.actions}>
+        <SearchButton variant="wide" />
         {current !== null ? <span className={styles.session}>Sessão {current}</span> : null}
         <button
           type="button"

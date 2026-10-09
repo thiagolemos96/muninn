@@ -9,7 +9,7 @@
   top: 0;
   z-index: 1;
   display: grid;
-  grid-template-columns: var(--touch) 1fr var(--touch);
+  grid-template-columns: var(--touch) 1fr auto;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
@@ -24,6 +24,11 @@
   height: var(--touch);
   border-radius: var(--radius-control);
   color: var(--ink);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
 }
 
 .title {

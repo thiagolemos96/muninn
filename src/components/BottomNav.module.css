@@ -23,6 +23,12 @@
   color: var(--muted);
 }
 
+.tab {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .active {
   color: var(--rubric);
   font-weight: 700;

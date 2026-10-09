@@ -2,6 +2,8 @@ import { Link, Outlet, useParams } from 'react-router';
 import { BottomNav } from '../../components/BottomNav.tsx';
 import { BackIcon } from '../../components/icons.tsx';
 import { Status } from '../../components/Status.tsx';
+import { SearchButton } from '../search/SearchButton.tsx';
+import { SearchDialog } from '../search/SearchDialog.tsx';
 import { ThemeToggle } from '../theme/ThemeToggle.tsx';
 import { DmSidebar } from './DmSidebar.tsx';
 import { DmTopBar } from './DmTopBar.tsx';
@@ -51,6 +53,7 @@ export function GrimoireLayout() {
         <div className={styles.phoneOnly}>
           <BottomNav slug={slug} />
         </div>
+        <SearchDialog campaign={campaign.data} />
       </div>
     );
   }
@@ -66,12 +69,16 @@ export function GrimoireLayout() {
           <span className={styles.back} aria-hidden="true" />
         )}
         <span className={styles.title}>{campaign.data?.name ?? 'Grimório'}</span>
-        <ThemeToggle />
+        <div className={styles.actions}>
+          {campaign.data ? <SearchButton variant="icon" /> : null}
+          <ThemeToggle />
+        </div>
       </header>
 
       <main className={styles.main}>{body}</main>
 
       <BottomNav slug={slug} />
+      {campaign.data ? <SearchDialog campaign={campaign.data} /> : null}
     </div>
   );
 }
