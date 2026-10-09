@@ -5,8 +5,15 @@ import { VisibilitySelect } from '../../components/VisibilitySelect.tsx';
 import { useCampaignContext } from '../campaigns/campaignContext.ts';
 import { useViewMode } from '../campaigns/viewMode.ts';
 import { ENTITY_TYPES, TYPE_LABEL, type EntityType } from './entityTypes.ts';
-import { useDeleteCard, useSaveCard, type BlockDraft, type CardDraft } from './mutations.ts';
-import { useBlocks, useEntity } from './queries.ts';
+import { LinksEditor } from './LinksEditor.tsx';
+import {
+  useDeleteCard,
+  useSaveCard,
+  type BlockDraft,
+  type CardDraft,
+  type LinkDraft,
+} from './mutations.ts';
+import { useBlocks, useEntities, useEntity, useLinks } from './queries.ts';
 import styles from './CardEditorPage.module.css';
 
 // "/c/:slug/novo" and "/c/:slug/e/:id/editar". The page only hides itself from
@@ -17,9 +24,15 @@ export function CardEditorPage() {
   const { isDm, ready } = useViewMode(campaign.id);
   const entity = useEntity(campaign.id, id ?? '');
   const blocks = useBlocks(id ? entity.data?.id : undefined);
+  const links = useLinks(id ? entity.data?.id : undefined);
+  const entities = useEntities(campaign.id);
 
   if (!ready) return <Status>Carregando…</Status>;
   if (!isDm) return <Status>Só o mestre edita cards.</Status>;
+  if (entities.isPending) return <Status>Carregando…</Status>;
+  if (entities.isError)
+    return <Status>Não deu pra abrir os cards: {entities.error.message}</Status>;
+  const cards = entities.data;
 
   if (!id) {
     const blank: CardDraft = {
@@ -30,12 +43,22 @@ export function CardEditorPage() {
       tags: [],
       visibility: 'dm',
     };
-    return <CardForm key="new" isNew initialCard={blank} initialBlocks={[]} />;
+    return (
+      <CardForm
+        key="new"
+        isNew
+        initialCard={blank}
+        initialBlocks={[]}
+        initialLinks={[]}
+        cards={cards}
+      />
+    );
   }
 
-  if (entity.isPending || blocks.isPending) return <Status>Carregando…</Status>;
+  if (entity.isPending || blocks.isPending || links.isPending) return <Status>Carregando…</Status>;
   if (entity.isError) return <Status>Não deu pra abrir o card: {entity.error.message}</Status>;
   if (blocks.isError) return <Status>Não deu pra abrir os blocos: {blocks.error.message}</Status>;
+  if (links.isError) return <Status>Não deu pra abrir as relações: {links.error.message}</Status>;
   if (!entity.data) return <Status>Esse card não existe.</Status>;
 
   const card = entity.data;
@@ -57,6 +80,20 @@ export function CardEditorPage() {
         body_md: block.body_md,
         visibility: block.visibility,
       }))}
+      initialLinks={links.data.flatMap((link) =>
+        link.from && link.to
+          ? [
+              {
+                id: link.id,
+                fromId: link.from.id,
+                toId: link.to.id,
+                label: link.label,
+                visibility: link.visibility,
+              },
+            ]
+          : [],
+      )}
+      cards={cards}
     />
   );
 }
@@ -65,9 +102,11 @@ type FormProps = {
   isNew: boolean;
   initialCard: CardDraft;
   initialBlocks: BlockDraft[];
+  initialLinks: LinkDraft[];
+  cards: { id: string; name: string; type: EntityType }[];
 };
 
-function CardForm({ isNew, initialCard, initialBlocks }: FormProps) {
+function CardForm({ isNew, initialCard, initialBlocks, initialLinks, cards }: FormProps) {
   const campaign = useCampaignContext();
   const navigate = useNavigate();
   const save = useSaveCard();
@@ -76,6 +115,8 @@ function CardForm({ isNew, initialCard, initialBlocks }: FormProps) {
   const [card, setCard] = useState(initialCard);
   const [tagsText, setTagsText] = useState(initialCard.tags.join(', '));
   const [blocks, setBlocks] = useState(initialBlocks);
+  const [links, setLinks] = useState(initialLinks);
+  const [linkProblem, setLinkProblem] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [nameMissing, setNameMissing] = useState(false);
 
@@ -109,13 +150,21 @@ function CardForm({ isNew, initialCard, initialBlocks }: FormProps) {
       .split(',')
       .map((tag) => tag.trim())
       .filter(Boolean);
+    if (links.some((link) => !link.label.trim())) {
+      setLinkProblem(true);
+      return;
+    }
+    setLinkProblem(false);
     const keptIds = new Set(blocks.map((block) => block.id));
+    const keptLinkIds = new Set(links.map((link) => link.id));
     save.mutate(
       {
         campaignId: campaign.id,
         card: { ...card, tags },
         blocks,
+        links,
         removedBlockIds: initialBlocks.map((b) => b.id).filter((blockId) => !keptIds.has(blockId)),
+        removedLinkIds: initialLinks.map((l) => l.id).filter((linkId) => !keptLinkIds.has(linkId)),
       },
       { onSuccess: () => void navigate(cardPath) },
     );
@@ -261,6 +310,19 @@ function CardForm({ isNew, initialCard, initialBlocks }: FormProps) {
       <button type="button" className={styles.button} onClick={addBlock}>
         Adicionar bloco
       </button>
+
+      <LinksEditor
+        cardId={card.id}
+        cardName={card.name}
+        cards={cards}
+        links={links}
+        onChange={setLinks}
+      />
+      {linkProblem ? (
+        <p className={styles.error} role="alert">
+          Toda relação precisa de um rótulo.
+        </p>
+      ) : null}
 
       {save.isError ? (
         <p className={styles.error} role="alert">

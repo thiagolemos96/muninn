@@ -21,12 +21,23 @@ export type BlockDraft = {
   visibility: Visibility;
 };
 
+// Direction matters for the sentence: "{from} {label} {to}"
+export type LinkDraft = {
+  id: string;
+  fromId: string;
+  toId: string;
+  label: string;
+  visibility: Visibility;
+};
+
 type SaveInput = {
   campaignId: string;
   card: CardDraft;
   blocks: BlockDraft[];
-  // Blocks that existed when the editor opened and were removed since
+  links: LinkDraft[];
+  // Rows that existed when the editor opened and were removed since
   removedBlockIds: string[];
+  removedLinkIds: string[];
 };
 
 // Ids are created in the browser (crypto.randomUUID), so a new card and its new blocks
@@ -37,7 +48,14 @@ export function useSaveCard() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ campaignId, card, blocks, removedBlockIds }: SaveInput) => {
+    mutationFn: async ({
+      campaignId,
+      card,
+      blocks,
+      links,
+      removedBlockIds,
+      removedLinkIds,
+    }: SaveInput) => {
       const entity = await supabase.from('entities').upsert({
         id: card.id,
         campaign_id: campaignId,
@@ -69,6 +87,26 @@ export function useSaveCard() {
         );
         if (saved.error) throw saved.error;
       }
+
+      // Links last: a new card must exist before anything can point to it
+      if (removedLinkIds.length > 0) {
+        const removed = await supabase.from('links').delete().in('id', removedLinkIds);
+        if (removed.error) throw removed.error;
+      }
+
+      if (links.length > 0) {
+        const saved = await supabase.from('links').upsert(
+          links.map((link) => ({
+            id: link.id,
+            campaign_id: campaignId,
+            from_id: link.fromId,
+            to_id: link.toId,
+            label: link.label.trim(),
+            visibility: link.visibility,
+          })),
+        );
+        if (saved.error) throw saved.error;
+      }
       return card.id;
     },
     onSuccess: () => invalidateCards(queryClient),
@@ -89,7 +127,7 @@ export function useDeleteCard() {
 }
 
 function invalidateCards(queryClient: ReturnType<typeof useQueryClient>) {
-  for (const key of ['entities', 'entity', 'blocks']) {
+  for (const key of ['entities', 'entity', 'blocks', 'links']) {
     void queryClient.invalidateQueries({ queryKey: [key] });
   }
 }
