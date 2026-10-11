@@ -31,11 +31,14 @@
 
 .titleActions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
 .importLink {
   display: inline-flex;
+  background: transparent;
+  cursor: pointer;
   align-items: center;
   min-height: var(--touch);
   padding: 0 var(--space-4);

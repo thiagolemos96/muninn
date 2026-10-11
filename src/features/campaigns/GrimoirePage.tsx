@@ -6,6 +6,7 @@ import { TypeFilter } from '../../components/TypeFilter.tsx';
 import { useEntities } from '../cards/queries.ts';
 import { useUiStore } from '../ui/uiStore.ts';
 import { useCampaignContext } from './campaignContext.ts';
+import { ExportButton } from './ExportButton.tsx';
 import { useViewMode } from './viewMode.ts';
 import styles from './GrimoirePage.module.css';
 
@@ -43,6 +44,7 @@ export function GrimoirePage() {
             <Link to="importar" className={styles.importLink}>
               Importar
             </Link>
+            <ExportButton campaign={campaign} />
             <Link to="novo" className={styles.newCard}>
               Novo card
             </Link>
