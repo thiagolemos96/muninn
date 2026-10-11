@@ -87,7 +87,7 @@ Detalhes que mordem:
 
 ### 5. Manutenção
 
-- O Supabase Free pausa o projeto depois de uma semana sem atividade e não faz backup automático. As mitigações (consulta periódica e exportação) estão no `docs/escopo.md` e ainda não foram feitas.
+- O Supabase Free pausa o projeto depois de uma semana sem atividade e não faz backup automático. Faça backup pelo botão **Exportar** da lista de cards (formato em `docs/importador.md`). A consulta periódica que evita a pausa ainda não foi feita.
 - Mudou o schema ou uma política? Crie uma migration nova (nunca edite uma já aplicada), adicione o caso em `supabase/tests/rls.test.mjs` e rode `npm run test:rls`.
 - Tabela nova nasce **sem acesso** pra `anon` e `authenticated` (migration 005). A migration que cria a tabela também dá os `grant` que ela precisa; o teste falha se faltar.
 

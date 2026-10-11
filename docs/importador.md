@@ -56,3 +56,9 @@ Cole isto junto com o doc da sessão:
 > [cole aqui a seção "Formato" deste arquivo]
 
 Revise a prévia antes de importar: é ela que mostra o que é novo e o que já existia.
+
+## Backup: Exportar
+
+Em **Cards > Exportar**, o mestre baixa `muninn-<slug>-<data>.json` com todos os cards, blocos e relações, já neste formato e com a visibilidade de cada um. Importar esse arquivo numa campanha vazia recria tudo; importar na mesma campanha não muda nada (tudo já existe).
+
+O arquivo também traz `campaign`, `exported_at`, `sessions` e o `image` de cada card (o caminho no Storage). O importador ignora esses campos: as sessões e as imagens não voltam por ele. Guarde as imagens à parte se quiser um backup completo.
