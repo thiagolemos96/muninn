@@ -9,7 +9,7 @@ Um app com duas áreas pras campanhas de D&D 2024:
 
 Quem decide o que cada um vê é o banco (RLS do Postgres), nunca o front. As regras estão em `supabase/migrations` e são testadas por `npm run test:rls`.
 
-Stack: React 19, TypeScript, Vite 8 (PWA), React Router, TanStack Query, Supabase (Postgres, Auth, Storage), Cloudflare Pages.
+Stack: React 19, TypeScript, Vite 8 (PWA), React Router, TanStack Query, Supabase (Postgres, Auth, Storage), Cloudflare (Workers com arquivos estáticos).
 
 ## Rodar localmente
 
@@ -54,7 +54,7 @@ A ordem importa: o seed precisa do seu usuário, e o usuário só existe depois 
 4. No Supabase, vá em **Authentication > Sign In / Providers**: ligue o **Google** com o Client ID e o Client Secret, e desligue o **Email**.
    Depois de salvar, confira que o Google aparece como **ENABLED** na lista.
 5. Em **Authentication > URL Configuration**:
-   - Site URL: `http://localhost:5173` por enquanto (troque pela URL do Pages no passo 4).
+   - Site URL: `http://localhost:5173` por enquanto (troque pela URL do Cloudflare no passo 4).
    - Redirect URLs: `http://localhost:5173/**`.
 
 ### 3. Primeiro login e seed
@@ -66,23 +66,23 @@ A ordem importa: o seed precisa do seu usuário, e o usuário só existe depois 
 
 Pra conferir o modelo de acesso: numa aba anônima, abra `http://localhost:5173/c/rise-of-tiamat`. Só pode aparecer o que está marcado como grupo.
 
-### 4. Cloudflare Pages
+### 4. Cloudflare (Workers, só arquivos estáticos)
+
+A Cloudflare cria projetos novos de "Workers & Pages" como **Worker**. O `wrangler.jsonc` da raiz diz o que publicar: a pasta `dist/` em modo SPA, sem código de servidor.
 
 1. Suba o repositório pro GitHub.
-2. No Cloudflare: **Workers & Pages > Create > Pages > Connect to Git** e escolha o repositório.
+2. No Cloudflare: **Workers & Pages > Create > Import a repository** e escolha o repositório.
 3. Build:
-   - Production branch: `main`
-   - Framework preset: `None`
    - Build command: `npm run build`
-   - Build output directory: `dist`
-4. Em **Environment variables** (Production e Preview), crie `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. O Node vem do `.nvmrc`; se o build usar uma versão antiga, adicione `NODE_VERSION` = `24`.
-5. Faça o deploy e anote a URL (`https://<projeto>.pages.dev`).
-6. De volta ao Supabase, em **URL Configuration**: troque a Site URL pela URL do Pages e adicione `https://<projeto>.pages.dev/**` nas Redirect URLs. Mantenha a do localhost pra continuar desenvolvendo.
+   - Deploy command: `npx wrangler deploy` (o padrão)
+4. Em **Settings > Build > Build variables and secrets**, crie `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. Tem que ser aqui: o Vite lê essas variáveis no build, e as "Variables & Secrets" comuns só existem em execução. Se o build usar um Node antigo, adicione `NODE_VERSION` = `24`.
+5. Faça o deploy e anote a URL (`https://muninn.<sua-conta>.workers.dev`).
+6. De volta ao Supabase, em **URL Configuration**: troque a Site URL pela URL do Worker e adicione `https://muninn.<sua-conta>.workers.dev/**` nas Redirect URLs. Mantenha a do localhost pra continuar desenvolvendo.
 
 Detalhes que mordem:
 
 - As variáveis `VITE_*` entram no bundle na hora do build. Mudou alguma? Faça um novo deploy.
-- Rotas do SPA: o `public/_redirects` manda tudo pro `index.html`. O Pages já faz isso sozinho enquanto não existir um `404.html` na raiz, então o arquivo é só garantia.
+- Rotas do SPA: o `wrangler.jsonc` usa `not_found_handling: "single-page-application"`. Não crie `public/_redirects` com `/* /index.html 200`: os Workers recusam essa regra como loop infinito.
 - O app é um PWA. Depois de um deploy novo, a versão nova entra no próximo carregamento da página.
 
 ### 5. Manutenção
