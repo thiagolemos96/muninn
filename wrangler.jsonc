@@ -1,0 +1,11 @@
+// Cloudflare Workers static assets: serves dist/ as is, no Worker code.
+// SPA mode answers unknown paths (/c/rise-of-tiamat/e/...) with /index.html and 200.
+// It replaces public/_redirects, whose "/* /index.html 200" Workers rejects as a loop.
+{
+  "name": "muninn",
+  "compatibility_date": "2026-10-11",
+  "assets": {
+    "directory": "./dist/",
+    "not_found_handling": "single-page-application",
+  },
+}
