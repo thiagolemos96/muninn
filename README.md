@@ -87,7 +87,7 @@ Detalhes que mordem:
 
 ### 5. Manutenção
 
-- O Supabase Free pausa o projeto depois de uma semana sem atividade e não faz backup automático. Faça backup pelo botão **Exportar** da lista de cards (formato em `docs/importador.md`). A consulta periódica que evita a pausa ainda não foi feita.
+- O Supabase Free pausa o projeto depois de uma semana sem atividade e não faz backup automático. Faça backup pelo botão **Exportar** da lista de cards (formato em `docs/importador.md`). Pra não pausar, o workflow `Keepalive` (`.github/workflows/keepalive.yml`) lê uma campanha a cada 3 dias. Ele usa duas **variáveis** do repositório (Settings > Secrets and variables > Actions > Variables): `SUPABASE_URL` e `SUPABASE_ANON_KEY`, os mesmos valores do `.env.local`. A anon key é pública, por isso vai como variável e não como secret. O GitHub desliga agendamentos de repositório parado há 60 dias: se o repo ficar esse tempo sem commit, reative o workflow na aba Actions.
 - Mudou o schema ou uma política? Crie uma migration nova (nunca edite uma já aplicada), adicione o caso em `supabase/tests/rls.test.mjs` e rode `npm run test:rls`.
 - Tabela nova nasce **sem acesso** pra `anon` e `authenticated` (migration 005). A migration que cria a tabela também dá os `grant` que ela precisa; o teste falha se faltar.
 
