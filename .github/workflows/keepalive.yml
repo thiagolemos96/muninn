@@ -14,11 +14,11 @@ jobs:
     steps:
       - name: Read one public campaign
         env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           test -n "$SUPABASE_URL" && test -n "$SUPABASE_ANON_KEY" || {
-            echo "Set SUPABASE_URL and SUPABASE_ANON_KEY under Settings > Secrets and variables > Actions > Variables"
+            echo "Set SUPABASE_URL and SUPABASE_ANON_KEY under Settings > Secrets and variables > Actions > Secrets"
             exit 1
           }
           curl --fail --silent --show-error --max-time 30 \
